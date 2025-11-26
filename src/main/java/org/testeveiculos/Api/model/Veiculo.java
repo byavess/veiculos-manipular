@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +18,6 @@ public class Veiculo {
     private Integer ano;
     private Double preco;
     private String cor;
-    private String fotoUrl;
+    private List<String> urlsFotos;
     private String descricao;
 }
