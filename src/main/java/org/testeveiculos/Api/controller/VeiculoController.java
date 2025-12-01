@@ -3,30 +3,29 @@
 package org.testeveiculos.Api.controller; // 🛑 PACOTE CONTROLLER
 
 
+import lombok.extern.log4j.Log4j2;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.testeveiculos.Api.model.Veiculo;
 import org.testeveiculos.Api.service.VeiculoService;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/veiculos")
 @CrossOrigin(origins = "*") // 🛑 Essencial para o Angular
+@Log4j2
 public class VeiculoController {
+
 
 private final VeiculoService veiculoService;
 public VeiculoController (VeiculoService veiculoService){
     this.veiculoService = veiculoService;
 }
-
-    private final Path imageDirectory = Paths.get("src/main/resources/images");
 
     @GetMapping
     public List<Veiculo> getAllVeiculos() {
@@ -60,21 +59,29 @@ public VeiculoController (VeiculoService veiculoService){
     public ResponseEntity<Resource> getImagem(@RequestParam("path") String path) {
         try {
             if (path.contains("..")) {
+                log.warn("Imagem path rejected (traversal): {}", path);
                 return ResponseEntity.badRequest().build();
             }
 
-            Path imagePath = imageDirectory.resolve(path).normalize();
-            Resource resource = new UrlResource(imagePath.toUri());
+            String normalized = path.replaceFirst("^/+", "").replaceFirst("^images/", "");
+            String classpathLocation = "images/" + normalized;
 
-            if (resource.exists() && resource.isReadable()) {
-                String contentType = determineContentType(path);
+            Resource resource = new ClassPathResource(classpathLocation);
+            boolean exists = resource.exists();
+            boolean readable = resource.isReadable();
+
+
+            if (exists && readable) {
+                String contentType = determineContentType(classpathLocation);
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
             } else {
+                log.warn("Imagem not found: {}", classpathLocation);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
+            log.error("Erro ao servir imagem: {}", path, e);
             return ResponseEntity.internalServerError().build();
         }
     }

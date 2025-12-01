@@ -14,34 +14,40 @@ public class VeiculoService {
     public VeiculoService() {
         // Inicializando com dados de exemplo baseados na sua estrutura de pastas
         veiculos.add(new Veiculo(1L, "BMW", "X1", 2023, 250000.00,
-                "BMW X1 2023 - Luxo e performance","vermelha", "veiculos/bmw/bmw.webp"));
+                "BMW X1 2023 - Luxo e performance","vermelha", List.of(
+                        "/images/veiculos/bmw/bmw.webp",
+                        "/images/veiculos/bmw/bmw1.webp",
+                        "/images/veiculos/bmw/bmw2.webp"
+                )));
         veiculos.add(new Veiculo(2L, "Renault", "Duster", 2023, 120000.00,
-                "Renault Duster 2023 - SUV robusto","azul", "veiculos/bmw/bmw.webp"));
+                "Renault Duster 2023 - SUV robusto","azul", List.of(
+                        "/images/veiculos/duster/duster.webp",
+                        "/images/veiculos/duster/duster1.webp",
+                        "/images/veiculos/duster/duster2.webp"
+                )));
         veiculos.add(new Veiculo(3L, "Ford", "EcoSport", 2023, 110000.00,
-                "Ford EcoSport 2023 - Compacto e versátil","preta", "veiculos/bmw/bmw.webp"));
+                "Ford EcoSport 2023 - Compacto e versátil","preta", List.of(
+                        "/images/veiculos/ecoSport/ecosport.webp",
+                        "/images/veiculos/ecoSport/ecosport1.webp",
+                        "/images/veiculos/ecoSport/ecosport2.webp"
+                )));
         veiculos.add(new Veiculo(4L, "Volkswagen", "Gol", 2023, 80000.00,
-                "Volkswagen Gol 2023 - Clássico brasileiro","amarela", "veiculos/bmw/bmw.webp"));
+                "Volkswagen Gol 2023 - Clássico brasileiro","amarela", List.of(
+                        "/images/veiculos/gol/gol.webp",
+                        "/images/veiculos/gol/gol1.webp",
+                        "/images/veiculos/gol/gol2.webp"
+                )));
         veiculos.add(new Veiculo(5L, "Fiat", "Uno", 2023, 70000.00,
-                "Fiat Uno 2023 - Econômico e prático","branca", "veiculos/bmw/bmw.webp"));
+                "Fiat Uno 2023 - Econômico e prático","branca", List.of(
+                        "/images/veiculos/uno/fiat.webp",
+                        "/images/veiculos/uno/fiat1.webp",
+                        "/images/veiculos/uno/fiat2.webp"
+                )));
     }
 
     public List<Veiculo> getAllVeiculos() {
-        for (Veiculo veiculo : veiculos) {
-            if (veiculo.getUrlsFotos() != null) {
-                List<String> novasUrls = new ArrayList<>();
-                for (String url : veiculo.getUrlsFotos()) {
-                    if (url.startsWith("/")) {
-                        novasUrls.add("http://localhost:8080" + url);
-                    } else {
-                        novasUrls.add(url);
-                    }
-                }
-                veiculo.setUrlsFotos(novasUrls);
-            }
-        }
-
         return veiculos;
-    };
+    }
 
 
     public Optional<Veiculo> getVeiculoById(Long id) {
