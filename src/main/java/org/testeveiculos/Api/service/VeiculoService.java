@@ -26,8 +26,23 @@ public class VeiculoService {
     }
 
     public List<Veiculo> getAllVeiculos() {
+        for (Veiculo veiculo : veiculos) {
+            if (veiculo.getUrlsFotos() != null) {
+                List<String> novasUrls = new ArrayList<>();
+                for (String url : veiculo.getUrlsFotos()) {
+                    if (url.startsWith("/")) {
+                        novasUrls.add("http://localhost:8080" + url);
+                    } else {
+                        novasUrls.add(url);
+                    }
+                }
+                veiculo.setUrlsFotos(novasUrls);
+            }
+        }
+
         return veiculos;
-    }
+    };
+
 
     public Optional<Veiculo> getVeiculoById(Long id) {
         return veiculos.stream()
@@ -61,4 +76,6 @@ public class VeiculoService {
                                 veiculo.getDescricao().toLowerCase().contains(termoLower))
                 .toList();
     }
+
+
 }
