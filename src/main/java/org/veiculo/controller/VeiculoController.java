@@ -106,22 +106,17 @@ public VeiculoController (VeiculoService veiculoService){
             @RequestParam(name = "modelo", required = false) String modelo,
             @RequestParam(name = "anoMin", required = false) Integer anoMin,
             @RequestParam(name = "anoMax", required = false) Integer anoMax,
-            @RequestParam(name = "sort", defaultValue = "preco") String sort,
-            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "sort", defaultValue = "emOferta") String sort,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "12") int size
     ) {
-        String sortBy = "preco";
-        if (sort.equalsIgnoreCase("menorValor")) sortBy = "preco";
-        else if (sort.equalsIgnoreCase("maiorValor")) sortBy = "preco";
-        else if (sort.equalsIgnoreCase("dataCadastro")) sortBy = "id";
+        log.info("🔍 Recebendo parâmetros - sort: {}, direction: {}, marca: {}, modelo: {}",
+                sort, direction, marca, modelo);
 
-        String dir = direction;
-        if (sort.equalsIgnoreCase("maiorValor")) dir = "desc";
-        else if (sort.equalsIgnoreCase("menorValor")) dir = "asc";
-
+        // Usar os parâmetros diretamente sem conversão
         return veiculoService.searchVeiculosPaginado(
-                marca, modelo, anoMin, anoMax, sortBy, dir, page, size
+                marca, modelo, anoMin, anoMax, sort, direction, page, size
         );
     }
 }

@@ -73,4 +73,4 @@ INSERT INTO veiculo (id, marca, modelo, ano, km, preco, descricao, cor, motor, c
 
 (24, 'Citroën', 'C4 Cactus', 2021, 70000, 115000.00,
  'Citroën C4 Cactus Feel 1.6 2021 - SUV crossover com design exclusivo Airbumps nas laterais. Motor 1.6 flex de 118cv, câmbio automático de 6 marchas. Conforto excepcional com suspensão Progressive Hydraulic Cushions, bancos Advanced Comfort e isolamento acústico. Tecnologia: Head-up Display, tela 10" e sistema de conectividade com 4G. Diferencial único no mercado.',
- 'branco', '1.6 Flex', 'MANUAL', 'FLEX', '["/images/veiculos/citroen/c4cactus-webp","/images/veiculos/citroen/c4cactus-lateral.webp","/images/veiculos/citroen/c4cactus-interior.webp","/images/veiculos/citroen/c4cactus-traseira.webp"]', false);
+ 'branco', '1.6 Flex', 'MANUAL', 'FLEX', '["/images/veiculos/citroen/c4cactus.webp","/images/veiculos/citroen/c4cactuslateral.webp","/images/veiculos/citroen/c4cactus-interior.webp","/images/veiculos/citroen/c4cactus-traseira.webp"]', false);

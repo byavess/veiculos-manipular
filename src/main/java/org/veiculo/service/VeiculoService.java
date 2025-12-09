@@ -97,6 +97,8 @@ public class VeiculoService {
         System.out.println("   Modelo: '" + modelo + "' (isEmpty: " + (modelo != null && modelo.isEmpty()) + ")");
         System.out.println("   AnoMin: " + anoMin);
         System.out.println("   AnoMax: " + anoMax);
+        System.out.println("   🎯 SortBy: " + sortBy);
+        System.out.println("   🎯 Direction: " + direction);
 
         Specification<Veiculo> spec = Specification.where(null);
         if (marca != null && !marca.isEmpty()) {
@@ -113,16 +115,30 @@ public class VeiculoService {
         if (anoMax != null) {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("ano"), anoMax));
         }
-        // Sempre ordenar por ofertas primeiro (em_oferta DESC)
-        Sort sort = Sort.by(Sort.Direction.DESC, "emOferta");
 
+        // Configurar ordenação baseada nos parâmetros recebidos
+        Sort sort;
         if (sortBy != null && !sortBy.isEmpty()) {
             Sort.Direction dir = (direction != null && direction.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            sort = sort.and(Sort.by(dir, sortBy));
+            sort = Sort.by(dir, sortBy);
+
+            // Se não for ordenação por oferta, adicionar ofertas como segundo critério
+            if (!"emOferta".equals(sortBy)) {
+                sort = sort.and(Sort.by(Sort.Direction.DESC, "emOferta"));
+            }
+        } else {
+            // Padrão: ordenar por ofertas primeiro
+            sort = Sort.by(Sort.Direction.DESC, "emOferta");
         }
 
+        System.out.println("✅ Sort final criado: " + sort);
+
         Pageable pageable = PageRequest.of(page, size, sort);
-        return veiculoRepository.findAll(spec, pageable);
+        Page<Veiculo> result = veiculoRepository.findAll(spec, pageable);
+
+        System.out.println("📊 Resultados: " + result.getContent().size() + " veículos na página");
+
+        return result;
     }
 
 
