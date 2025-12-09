@@ -43,4 +43,7 @@ public class Veiculo {
     @Column(name = "urls_fotos", columnDefinition = "TEXT")
     private List<String> urlsFotos;
 
+    @Column(name = "em_oferta")
+    private Boolean emOferta = false;
+
 }

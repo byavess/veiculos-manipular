@@ -113,11 +113,14 @@ public class VeiculoService {
         if (anoMax != null) {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("ano"), anoMax));
         }
-        Sort sort = Sort.unsorted();
+        // Sempre ordenar por ofertas primeiro (em_oferta DESC)
+        Sort sort = Sort.by(Sort.Direction.DESC, "emOferta");
+
         if (sortBy != null && !sortBy.isEmpty()) {
             Sort.Direction dir = (direction != null && direction.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            sort = Sort.by(dir, sortBy);
+            sort = sort.and(Sort.by(dir, sortBy));
         }
+
         Pageable pageable = PageRequest.of(page, size, sort);
         return veiculoRepository.findAll(spec, pageable);
     }

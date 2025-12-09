@@ -10,5 +10,6 @@ CREATE TABLE veiculo (
                          motor VARCHAR(50),
                          cambio VARCHAR(20),
                          combustivel VARCHAR(20),
-                         urls_fotos TEXT
+                         urls_fotos TEXT,
+                         em_oferta BOOLEAN DEFAULT FALSE
 );

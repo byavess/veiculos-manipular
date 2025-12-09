@@ -111,14 +111,10 @@ public VeiculoController (VeiculoService veiculoService){
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "12") int size
     ) {
-        log.info("🎯 Controller recebeu parâmetros:");
-        log.info("   Marca: '{}' | Modelo: '{}' | AnoMin: {} | AnoMax: {}", marca, modelo, anoMin, anoMax);
-        log.info("   Page: {} | Size: {} | Sort: {} | Direction: {}", page, size, sort, direction);
-
         String sortBy = "preco";
         if (sort.equalsIgnoreCase("menorValor")) sortBy = "preco";
         else if (sort.equalsIgnoreCase("maiorValor")) sortBy = "preco";
-        else if (sort.equalsIgnoreCase("dataCadastro")) sortBy = "id"; // Supondo que id representa ordem de cadastro
+        else if (sort.equalsIgnoreCase("dataCadastro")) sortBy = "id";
 
         String dir = direction;
         if (sort.equalsIgnoreCase("maiorValor")) dir = "desc";
