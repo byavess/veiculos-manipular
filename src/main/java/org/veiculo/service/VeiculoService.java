@@ -11,27 +11,37 @@ import org.springframework.stereotype.Service;
 import org.veiculo.model.dto.VeiculoRequest;
 import org.veiculo.model.entity.Veiculo;
 import org.veiculo.model.repository.VeiculoRepository;
+import org.veiculo.security.JwtUtil;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static org.veiculo.model.converter.VeiculoMapper.mapperVeiculoRequestParaVeiculo;
+import static org.veiculo.util.PlacaUtil.mascararPlaca;
 
 @Service
 @RequiredArgsConstructor
 public class VeiculoService {
     private final VeiculoRepository veiculoRepository;
 
-    public List<Veiculo> getAllVeiculos() {
-        return veiculoRepository.findAll();
+    private List<Veiculo> getAllVeiculos() {
+        List<Veiculo> veiculos = veiculoRepository.findAll();
+        if (!JwtUtil.isAdmin()) {
+            veiculos.forEach(veiculo -> veiculo.setPlaca(mascararPlaca(veiculo.getPlaca()))
+            );
+        }
+        return veiculos;
     }
 
 
-    public Optional<Veiculo> getVeiculoById(Long id) {
-        return Optional.ofNullable(veiculoRepository.findById(id).orElseThrow(
+    public Veiculo getVeiculoById(Long id) {
+        Veiculo veiculo = veiculoRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Veículo com ID " + id + " não encontrado.")
-        ));
+        );
+        if (!JwtUtil.isAdmin()) {
+            veiculo.setPlaca(mascararPlaca(veiculo.getPlaca()));
+        }
+        return veiculo;
     }
 
     public List<Veiculo> getVeiculosByMarca(String marca) {
@@ -72,20 +82,6 @@ public class VeiculoService {
 
     }
 
-    public List<Veiculo> searchVeiculos(String termo) {
-        if (termo == null || termo.trim().isEmpty()) {
-            return getAllVeiculos();
-        }
-
-        String termoLower = termo.toLowerCase();
-        return getAllVeiculos().stream()
-                .filter(veiculo ->
-                        veiculo.getMarca().toLowerCase().contains(termoLower) ||
-                                veiculo.getModelo().toLowerCase().contains(termoLower) ||
-                                veiculo.getDescricao().toLowerCase().contains(termoLower))
-                .toList();
-    }
-
     public Page<Veiculo> searchVeiculosPaginado(
             String q,
             String marca,
@@ -124,8 +120,13 @@ public class VeiculoService {
         }
         // Filtro por vendido
         spec = spec.and((root, query, cb) -> cb.equal(root.get("vendido"), vendidoFinal));
+        Page<Veiculo> veiculos = veiculoRepository.findAll(spec, pageable);
+        if (!JwtUtil.isAdmin()) {
+            veiculos.forEach(veiculo -> veiculo.setPlaca(mascararPlaca(veiculo.getPlaca()))
+            );
+        }
 
-        return veiculoRepository.findAll(spec, pageable);
+        return veiculos;
     }
 
 

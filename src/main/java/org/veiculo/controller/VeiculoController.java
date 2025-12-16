@@ -26,8 +26,7 @@ public class VeiculoController {
 
     @GetMapping("/{id}")
     public Veiculo getVeiculoById(@PathVariable("id") Long id) {
-        Optional<Veiculo> veiculo = veiculoService.getVeiculoById(id);
-        return veiculo.orElse(null);
+        return veiculoService.getVeiculoById(id);
     }
 
     @GetMapping("/marca/{marca}")
@@ -46,12 +45,6 @@ public class VeiculoController {
             return veiculoService.getModelosByMarca(marca);
         }
         return veiculoService.getAllModelos();
-    }
-
-
-    @GetMapping("/search")
-    public List<Veiculo> searchVeiculos(@RequestParam(required = false) String q) {
-        return veiculoService.searchVeiculos(q);
     }
 
 
