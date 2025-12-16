@@ -2,6 +2,7 @@ package org.veiculo.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.veiculo.model.converter.StringListConverter;
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class Veiculo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,5 +47,11 @@ public class Veiculo {
 
     @Column(name = "em_oferta")
     private Boolean emOferta = false;
+
+    @Column(name = "vendido")
+    private Boolean vendido = false;
+
+    @Column(unique = true)
+    private String placa;
 
 }

@@ -1,8 +1,7 @@
-// src/main/java/org.testeveiculos.veiculosapi/controller/VeiculoController.java
-
-package org.veiculo.controller; // 🛑 PACOTE CONTROLLER
+package org.veiculo.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -18,16 +17,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/veiculos")
-@CrossOrigin(origins = "*")
 @Log4j2
+@RequiredArgsConstructor
 public class VeiculoController {
 
 
-private final VeiculoService veiculoService;
-public VeiculoController (VeiculoService veiculoService){
-    this.veiculoService = veiculoService;
-}
-
+    private final VeiculoService veiculoService;
 
     @GetMapping("/{id}")
     public Veiculo getVeiculoById(@PathVariable("id") Long id) {
@@ -37,7 +32,6 @@ public VeiculoController (VeiculoService veiculoService){
 
     @GetMapping("/marca/{marca}")
     public List<Veiculo> getVeiculosByMarca(@PathVariable("marca") String marca) {
-
         return veiculoService.getVeiculosByMarca(marca);
     }
 
@@ -102,6 +96,7 @@ public VeiculoController (VeiculoService veiculoService){
 
     @GetMapping()
     public Page<Veiculo> getVeiculosPaginado(
+            @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "marca", required = false) String marca,
             @RequestParam(name = "modelo", required = false) String modelo,
             @RequestParam(name = "anoMin", required = false) Integer anoMin,
@@ -109,14 +104,11 @@ public VeiculoController (VeiculoService veiculoService){
             @RequestParam(name = "sort", defaultValue = "emOferta") String sort,
             @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "12") int size
+            @RequestParam(name = "size", defaultValue = "12") int size,
+            @RequestParam(name = "vendido", required = false) Boolean vendido
     ) {
-        log.info("🔍 Recebendo parâmetros - sort: {}, direction: {}, marca: {}, modelo: {}",
-                sort, direction, marca, modelo);
-
-        // Usar os parâmetros diretamente sem conversão
         return veiculoService.searchVeiculosPaginado(
-                marca, modelo, anoMin, anoMax, sort, direction, page, size
+                q, marca, modelo, anoMin, anoMax, sort, direction, page, size, vendido
         );
     }
 }

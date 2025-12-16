@@ -1,18 +1,22 @@
 package org.veiculo.service;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.veiculo.model.dto.VeiculoRequest;
 import org.veiculo.model.entity.Veiculo;
 import org.veiculo.model.repository.VeiculoRepository;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.veiculo.model.converter.VeiculoMapper.mapperVeiculoRequestParaVeiculo;
 
 @Service
 @RequiredArgsConstructor
@@ -83,31 +87,34 @@ public class VeiculoService {
     }
 
     public Page<Veiculo> searchVeiculosPaginado(
+            String q,
             String marca,
             String modelo,
             Integer anoMin,
             Integer anoMax,
-            String sortBy,
+            String sort,
             String direction,
             int page,
-            int size
+            int size,
+            Boolean vendido // novo parâmetro
     ) {
-        System.out.println("🔍 Filtros recebidos no Service:");
-        System.out.println("   Marca: '" + marca + "' (isEmpty: " + (marca != null && marca.isEmpty()) + ")");
-        System.out.println("   Modelo: '" + modelo + "' (isEmpty: " + (modelo != null && modelo.isEmpty()) + ")");
-        System.out.println("   AnoMin: " + anoMin);
-        System.out.println("   AnoMax: " + anoMax);
-        System.out.println("   🎯 SortBy: " + sortBy);
-        System.out.println("   🎯 Direction: " + direction);
-
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
         Specification<Veiculo> spec = Specification.where(null);
-        if (marca != null && !marca.isEmpty()) {
-            System.out.println("✅ Aplicando filtro de MARCA: " + marca);
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("marca")), "%" + marca.toLowerCase() + "%"));
+
+        final Boolean vendidoFinal = (vendido == null) ? false : vendido;
+
+        if (q != null && !q.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("marca")), "%" + q.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("modelo")), "%" + q.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("descricao")), "%" + q.toLowerCase() + "%")
+            ));
         }
-        if (modelo != null && !modelo.isEmpty()) {
-            System.out.println("✅ Aplicando filtro de MODELO: " + modelo);
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("modelo")), "%" + modelo.toLowerCase() + "%"));
+        if (marca != null && !marca.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("marca")), marca.toLowerCase()));
+        }
+        if (modelo != null && !modelo.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("modelo")), modelo.toLowerCase()));
         }
         if (anoMin != null) {
             spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("ano"), anoMin));
@@ -115,31 +122,42 @@ public class VeiculoService {
         if (anoMax != null) {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("ano"), anoMax));
         }
+        // Filtro por vendido
+        spec = spec.and((root, query, cb) -> cb.equal(root.get("vendido"), vendidoFinal));
 
-        // Configurar ordenação baseada nos parâmetros recebidos
-        Sort sort;
-        if (sortBy != null && !sortBy.isEmpty()) {
-            Sort.Direction dir = (direction != null && direction.equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            sort = Sort.by(dir, sortBy);
-
-            // Se não for ordenação por oferta, adicionar ofertas como segundo critério
-            if (!"emOferta".equals(sortBy)) {
-                sort = sort.and(Sort.by(Sort.Direction.DESC, "emOferta"));
-            }
-        } else {
-            // Padrão: ordenar por ofertas primeiro
-            sort = Sort.by(Sort.Direction.DESC, "emOferta");
-        }
-
-        System.out.println("✅ Sort final criado: " + sort);
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Veiculo> result = veiculoRepository.findAll(spec, pageable);
-
-        System.out.println("📊 Resultados: " + result.getContent().size() + " veículos na página");
-
-        return result;
+        return veiculoRepository.findAll(spec, pageable);
     }
 
 
+    public Veiculo salvar(@Valid VeiculoRequest veiculoRequest) {
+        veiculoRepository.findByPlaca(veiculoRequest.getPlaca()).ifPresent(veiculo -> {
+            ;
+            throw new IllegalArgumentException("Veículo com placa " + veiculoRequest.getPlaca() + " já existe.");
+        });
+        return veiculoRepository.save(mapperVeiculoRequestParaVeiculo(veiculoRequest));
+    }
+
+    public Veiculo atualizar(Long id, VeiculoRequest veiculoRequest) {
+        Veiculo veiculoExistente = veiculoRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Veículo com ID " + id + " não encontrado.")
+        );
+
+        if (!veiculoExistente.getPlaca().equals(veiculoRequest.getPlaca())) {
+            veiculoRepository.findByPlaca(veiculoRequest.getPlaca()).ifPresent(veiculo -> {
+                throw new IllegalArgumentException("Veículo com placa " + veiculoRequest.getPlaca() + " já existe.");
+            });
+        }
+
+        Veiculo veiculoAtualizado = mapperVeiculoRequestParaVeiculo(veiculoRequest);
+        veiculoAtualizado.setId(id);
+
+        return veiculoRepository.save(veiculoAtualizado);
+    }
+
+    public void deletar(Long id) {
+        Veiculo veiculoExistente = veiculoRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Veículo com ID " + id + " não encontrado.")
+        );
+        veiculoRepository.delete(veiculoExistente);
+    }
 }

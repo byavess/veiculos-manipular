@@ -35,7 +35,8 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
             return new ArrayList<>();
         }
         try {
-            return objectMapper.readValue(dbData, new TypeReference<List<String>>() {});
+            return objectMapper.readValue(dbData, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             log.error("Erro ao converter JSON para List<String>: {}", dbData, e);
             return new ArrayList<>();
