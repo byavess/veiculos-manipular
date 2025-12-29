@@ -13,7 +13,8 @@ CREATE TABLE veiculo (
                          urls_fotos TEXT,
                          em_oferta BOOLEAN DEFAULT FALSE,
                          vendido BOOLEAN DEFAULT FALSE,
-                         placa VARCHAR(20) UNIQUE NOT NULL
+                         placa VARCHAR(20) UNIQUE NOT NULL,
+                         info_venda TEXT
 );
 CREATE TABLE users (
                        id BIGINT AUTO_INCREMENT PRIMARY KEY,

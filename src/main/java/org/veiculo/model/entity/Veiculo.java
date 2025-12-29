@@ -54,4 +54,6 @@ public class Veiculo {
     @Column(unique = true)
     private String placa;
 
+    @Column(name = "info_venda", columnDefinition = "TEXT")
+    private String infoVenda;
 }

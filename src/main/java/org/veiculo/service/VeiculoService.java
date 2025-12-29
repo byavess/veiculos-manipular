@@ -97,8 +97,6 @@ public class VeiculoService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
         Specification<Veiculo> spec = Specification.where(null);
 
-        final Boolean vendidoFinal = (vendido == null) ? false : vendido;
-
         if (q != null && !q.trim().isEmpty()) {
             spec = spec.and((root, query, cb) -> cb.or(
                     cb.like(cb.lower(root.get("marca")), "%" + q.toLowerCase() + "%"),
@@ -118,8 +116,10 @@ public class VeiculoService {
         if (anoMax != null) {
             spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("ano"), anoMax));
         }
-        // Filtro por vendido
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("vendido"), vendidoFinal));
+        // Filtro por vendido: só aplica se informado
+        if (vendido != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("vendido"), vendido));
+        }
         Page<Veiculo> veiculos = veiculoRepository.findAll(spec, pageable);
         if (!JwtUtil.isAdmin()) {
             veiculos.forEach(veiculo -> veiculo.setPlaca(mascararPlaca(veiculo.getPlaca()))

@@ -41,7 +41,9 @@ public class VeiculoRequest {
     @NotNull
     private Boolean emOferta = false;
     @NotNull
-    private Boolean vendido = false;
+    private Boolean vendido;
     @NotBlank
     private String placa;
+    @NotBlank
+    private String infoVenda;
 }
