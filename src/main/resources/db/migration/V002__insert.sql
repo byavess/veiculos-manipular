@@ -1,79 +1,76 @@
+-- Padrão de nomenclatura de imagens: 0-{id} para principal, {ordem}-{id} para demais
 INSERT INTO veiculo (id, marca, modelo, ano, km, preco, descricao, cor, motor, cambio, combustivel, urls_fotos, em_oferta, vendido, placa, info_venda) VALUES
-(6, 'Toyota', 'Corolla', 2025, 15000, 160000.00,
- 'Toyota Corolla 2025 Hybrid - Sedan médio que combina eficiência e tecnologia. Com motor híbrido 1.8L que oferece consumo de 22 km/l na cidade, sistema Toyota Safety Sense 3.0 com assistente de permanência em faixa, controle cruzeiro adaptativo e pré-colisão. Interior em couro sintético, tela multimídia de 10,1" com Apple CarPlay/Android Auto sem fio e assentos aquecidos. Perfeito para quem busca confiabilidade japonesa com baixo custo de manutenção.',
- 'prata', '1.8 Hybrid', 'AUTOMATICO', 'HIBRIDO', '["/images/veiculos/toyota/corolla.webp","/images/veiculos/toyota/corolla-lateral.webp","/images/veiculos/toyota/corolla-interior.webp","/images/veiculos/toyota/corolla-traseira.webp"]', true, false, 'ABC1D23', null),
+(1, 'BMW', '320i', 2022, 48000, 290000.00,
+ 'BMW Série 3 320i M Sport 2022 - Sedan esportivo alemão com motor 2.0 TwinPower Turbo de 184cv. Pacote M Sport com aerofólio, rodas 19" M, para-choque esportivo e badges M. Interior com bancos esportivos em couro Dakota, painel Live Cockpit Professional 12,3", tela central 10,25" e volante M multifuncional. Performance: 0-100km/h em 7,1s, suspensão M Sport e freios azuis M.',
+ 'branco', '2.0 TwinPower Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-1-320i.webp","veiculos/1-1-bmw.webp","veiculos/2-1-bmw1.webp","veiculos/3-1-bmw2.webp"]', true, false, 'HIJ2J56', null),
+
+(2, 'BMW', 'M4', 2023, 15000, 520000.00,
+ 'BMW M4 Competition 2023 - Coupé de alta performance com motor 3.0 biturbo de 510cv. Aceleração de 0-100km/h em 3,9s. Pacote M completo com suspensão adaptativa, diferencial M, freios carbocerâmicos e escape esportivo. Interior racing com bancos M carbon, painel digital M específico e volante M multifuncional.',
+ 'azul', '3.0 Biturbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-2-m4.webp"]', true, false, 'BMW1M23', null),
+
+(3, 'BMW', 'X5', 2024, 8000, 680000.00,
+ 'BMW X5 xDrive40i M Sport 2024 - SUV de luxo com motor 3.0 turbo de 340cv. Tração integral xDrive, suspensão a ar adaptativa e modo off-road. Interior premium com bancos Vernasca em couro, tela central 14,9", painel digital 12,3" e teto panorâmico. Tecnologia: assistente de direção autônomo nível 2, estacionamento remoto e sistema de som Harman Kardon.',
+ 'preto', '3.0 Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-3-x5.webp"]', false, false, 'BMW2X56', null),
+
+(4, 'Audi', 'A3', 2023, 29000, 260000.00,
+ 'Audi A3 Sportback 40 TFSI S line 2023 - Hatch premium com motor 2.0 TFSI de 204cv e câmbio S tronic de 7 marchas. Design esportivo com grade Singleframe preta, faróis Matrix LED e rodas 18" S line. Interior com bancos esportivos em couro, Virtual Cockpit Plus 12,3", tela MMI 10,1" e acabamento em alumínio. Performance: 0-100km/h em 6,8s, suspensão esportiva e direção progressiva.',
+ 'vermelho', '2.0 TFSI', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-4-a3.webp"]', true, false, 'CDE0F12', null),
+
+(5, 'Audi', 'Q5', 2024, 12000, 420000.00,
+ 'Audi Q5 45 TFSI Quattro S line 2024 - SUV premium com motor 2.0 TFSI de 249cv e tração integral quattro. Design sofisticado com grade octogonal, faróis Matrix LED e rodas 20" S line. Interior com bancos em couro ventilados, Virtual Cockpit Plus, tela MMI touch 10,1" e Bang & Olufsen 3D sound. Tecnologia: assistente de estacionamento plus e suspensão adaptativa.',
+ 'cinza', '2.0 TFSI', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-5-q5.webp"]', false, false, 'AUD5Q78', null),
+
+(6, 'Audi', 'TT', 2023, 18000, 380000.00,
+ 'Audi TT Coupé 45 TFSI Quattro 2023 - Coupé esportivo com motor 2.0 TFSI de 245cv. Design icônico com grade hexagonal, faróis LED Matrix e saídas de escape duplas. Interior esportivo com bancos S em couro/Alcantara, Virtual Cockpit 12,3" exclusivo TT e volante S multifuncional. Performance: 0-100km/h em 5,3s.',
+ 'vermelho', '2.0 TFSI', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-6-tt.webp"]', true, false, 'AUD6TT9', null),
 
 (7, 'Chevrolet', 'Onix', 2025, 12000, 85000.00,
  'Chevrolet Onix 2025 Turbo - Hatch compacto mais vendido do Brasil, agora com motor turbo 1.0 de 116cv. Design moderno com grade dianteira black piano, faróis full LED e rodas de liga leve 16". Interior com central multimídia de 10,1", volante multifuncional e bancos em tecido premium. Oferece conectividade MyLink com 4G Wi-Fi, 6 airbags e controle de estabilidade. Ideal para uso urbano com excelente desempenho.',
- 'vermelho', '1.0 Turbo', 'MANUAL', 'FLEX', '["/images/veiculos/chevrolet/onix.webp","/images/veiculos/chevrolet/onix-lateral.webp","/images/veiculos/chevrolet/onix-interior.webp","/images/veiculos/chevrolet/onix-traseira.webp"]', false, false, 'DEF2G45', 'Venda teste: Cliente Fulano, 29/12/2025'),
+ 'vermelho', '1.0 Turbo', 'MANUAL', 'FLEX', '["veiculos/0-7-onix.webp"]', true, false, 'DEF2G45', null),
 
-(8, 'Honda', 'Civic', 2025, 18000, 180000.00,
- 'Honda Civic Touring 2025 - Sedan esportivo com motor turbo 1.5L de 182cv e câmbio CVT. Design agressivo com para-choque esportivo, saída de escape dupla e rodas 18". Interior premium com bancos em couro, painel digital 10,2", Head-up Display e sistema de som Bose de 12 alto-falantes. Equipado com Honda Sensing: assistente de permanência em faixa, frenagem automática e controle cruzeiro adaptativo.',
- 'cinza', '1.5 Turbo', 'AUTOMATICO', 'GASOLINA', '["/images/veiculos/honda/civic.webp","/images/veiculos/honda/civic-lateral.webp","/images/veiculos/honda/civic-interior.webp","/images/veiculos/honda/civic-traseira.webp"]', true, false, 'GHI3J67', null),
+(8, 'Chevrolet', 'Tracker', 2024, 15000, 145000.00,
+ 'Chevrolet Tracker Premier 2024 - SUV compacto com motor turbo 1.0 de 116cv. Design arrojado com grade dupla, faróis LED e rodas 17". Interior premium com bancos em couro, tela 10,1", cluster digital 8" e carregador sem fio. Tecnologia: MyLink com Alexa integrada, OnStar e 6 airbags. Espaçoso e confortável.',
+ 'branco', '1.0 Turbo', 'AUTOMATICO', 'FLEX', '["veiculos/0-8-tracker.webp"]', false, false, 'CHV8TRK', null),
 
-(9, 'Hyundai', 'HB20', 2023, 32000, 82000.00,
- 'Hyundai HB20S Platinum 2023 - Sedan compacto com design "Parametric Dynamics". Motor 1.0 turbo flex de 120cv, câmbio automático de 6 marchas. Destaques: grade cascata digital, faróis full LED, rodas 17" diamantadas e lanternas em LED. Interior com tela 10,25", cluster digital 8", banco do motorista com ajuste elétrico e carregador sem fio. 5 estrelas Latin NCAP.',
- 'branco', '1.0 Turbo', 'AUTOMATICO', 'FLEX', '["/images/veiculos/hyundai/hb20.webp","/images/veiculos/hyundai/hb20-lateral.webp","/images/veiculos/hyundai/hb20-interior.webp","/images/veiculos/hyundai/hb20-traseira.webp"]', false, false, 'JKL4M89', null),
+(9, 'Chevrolet', 'Celta', 2015, 85000, 28000.00,
+ 'Chevrolet Celta LT 2015 - Hatch compacto econômico. Motor 1.0 flex de 78cv, consumo de 14 km/l. Design simples e funcional. Interior básico com ar-condicionado, direção hidráulica e vidros elétricos. Ideal para primeiro carro ou uso urbano. Baixo custo de manutenção e peças acessíveis.',
+ 'prata', '1.0 Flex', 'MANUAL', 'FLEX', '["veiculos/0-9-celta.webp"]', false, true, 'CHV9CLT', 'Vendido em 05/01/2026 - Cliente João Silva'),
 
-(10, 'Jeep', 'Compass', 2023, 28000, 220000.00,
- 'Jeep Compass Limited 4x2 2023 - SUV médio premium com motor turbo 1.3 flex de 185cv. Exterior com grade sete fendas cromada, faróis bi-LED e rodas 18". Interior com bancos em couro ventilados, tela Uconnect 10,1", painel digital 10,25" e teto solar panorâmico. Tecnologia: tração seletiva, assistente de estacionamento 360°, 70 assistências de direção e carregador sem fio.',
- 'preto', '1.3 Turbo', 'AUTOMATICO', 'FLEX', '["/images/veiculos/jeep/compass.webp","/images/veiculos/jeep/compass-lateral.webp","/images/veiculos/jeep/compass-interior.webp","/images/veiculos/jeep/compass-traseira.webp"]', true, false, 'MNO5P12', null),
+(10, 'Chevrolet', 'Corsa', 2010, 120000, 22000.00,
+ 'Chevrolet Corsa Sedan Classic 2010 - Sedan compacto com motor 1.0 flex de 78cv. Design clássico e atemporal. Interior simples com ar-condicionado e direção hidráulica. Porta-malas de 510L. Excelente para uso diário, muito econômico e confiável.',
+ 'branco', '1.0 Flex', 'MANUAL', 'FLEX', '["veiculos/0-10-corsa.webp"]', false, false, 'CHV0CRS', null),
 
-(11, 'Volkswagen', 'T-Cross', 2023, 35000, 130000.00,
- 'Volkswagen T-Cross Highline 2023 - SUV compacto alemão com motor 1.0 TSI 200 TSI de 116cv. Design jovem com faróis de LED, rodas 17" e grades cromadas. Interior espaçoso com bancos em couro, tela 10,1" Composition, volante multifuncional em couro e ar-condicionado digital. Destaques: 385L de porta-malas, assentos traseiros com regulagem longitudinal e 5 estrelas Latin NCAP.',
- 'laranja', '1.0 TSI', 'MANUAL', 'FLEX', '["/images/veiculos/vw/tcross.webp","/images/veiculos/vw/tcross-lateral.webp","/images/veiculos/vw/tcross-interior.webp","/images/veiculos/vw/tcross-traseira.webp"]', false, false, 'QRS6T34', null),
+(11, 'Chevrolet', 'Prisma', 2016, 72000, 48000.00,
+ 'Chevrolet Prisma LT 2016 - Sedan compacto com motor 1.4 flex de 106cv. Design moderno com grade dupla e faróis em máscara negra. Interior com MyLink 7", ar-condicionado e bancos em tecido. Porta-malas de 500L. Econômico e espaçoso para a família.',
+ 'prata', '1.4 Flex', 'MANUAL', 'FLEX', '["veiculos/0-11-prisma.webp"]', false, false, 'CHV1PRS', null),
 
-(12, 'Fiat', 'Strada', 2023, 42000, 95000.00,
- 'Fiat Strada Volcano 1.3 Turbo 2023 - Picape compacta líder de vendas. Motor 1.3 turbo flex de 109cv, capacidade de carga de 720kg. Cabine dupla com 5 lugares, interior moderno com tela 10,1", volante multifuncional e ar digital. Caçamba de 1.10m com revestimento anti-riscos. Ideal para trabalho e lazer, com suspensão independente dianteira para maior conforto.',
- 'azul', '1.3 Turbo', 'MANUAL', 'FLEX', '["/images/veiculos/fiat/strada.webp","/images/veiculos/fiat/strada-lateral.webp","/images/veiculos/fiat/strada-interior.webp","/images/veiculos/fiat/strada-cacamba.webp"]', true, false, 'TUV7W56', null),
+(12, 'Chevrolet', 'Vectra', 2009, 145000, 25000.00,
+ 'Chevrolet Vectra GT 2.0 2009 - Sedan médio com motor 2.0 flex de 140cv. Design elegante e esportivo. Interior em couro, ar digital e som premium. Porta-malas de 510L. Perfeito para quem busca conforto e espaço. Manutenção acessível.',
+ 'preto', '2.0 Flex', 'MANUAL', 'FLEX', '["veiculos/0-12-vectra.webp"]', false, false, 'CHV2VCT', null),
 
-(13, 'Toyota', 'Hilux', 2023, 38000, 280000.00,
- 'Toyota Hilux SRX 4x4 Diesel 2023 - Picape média com motor 2.8L turbodiesel de 204cv e torque de 51kgf.m. Transmissão automática de 6 velocidades com modo 4x4. Equipada com sistema Toyota Safety Sense, controle de descida, diferencial traseiro com bloqueio e suspensão traseira de molas. Interior com bancos em couro, tela 9" e câmera 360°. Resistência e durabilidade comprovadas.',
- 'branco', '2.8 Turbodiesel', 'AUTOMATICO', 'DIESEL', '["/images/veiculos/toyota/hilux.webp","/images/veiculos/toyota/hilux-lateral.webp","/images/veiculos/toyota/hilux-interior.webp","/images/veiculos/toyota/hilux-cacamba.webp"]', false, false, 'WXY8Z78', null),
+(13, 'BYD', 'Dolphin', 2024, 5000, 150000.00,
+ 'BYD Dolphin 2024 - Hatch elétrico com autonomia de 291km. Motor elétrico de 95cv, aceleração de 0-100km/h em 10,9s. Design moderno wave-style, faróis LED e rodas 16". Interior tech com tela giratória 12,8", cluster digital 5" e ar-condicionado automático. Carregamento: 0-80% em 29min (DC) ou 10h (AC). Zero emissões.',
+ 'azul', 'Elétrico', 'AUTOMATICO', 'ELETRICO', '["veiculos/0-13-dolphin.webp"]', true, false, 'BYD3DLP', null),
 
-(14, 'Mercedes-Benz', 'Classe C', 2023, 25000, 350000.00,
- 'Mercedes-Benz Classe C 200 Avantgarde 2023 - Sedan de luxo com motor 2.0 turbo de 204cv + motor elétrico de 23cv (híbrido leve). Design sofisticado com grade estrelada, faróis Multibeam LED e rodas 18". Interior com bancos Artico em couro, tela MBUX 11,9" inclinada, painel digital 12,3" e iluminação ambiental de 64 cores. Tecnologia: assistente de direção Level 2, estacionamento automático e Burmester sound system.',
- 'prata', '2.0 Turbo Hybrid', 'AUTOMATICO', 'HIBRIDO', '["/images/veiculos/mercedes/classec.webp","/images/veiculos/mercedes/classec-lateral.webp","/images/veiculos/mercedes/classec-interior.webp","/images/veiculos/mercedes/classec-painel.webp"]', false,false, 'ZAB9C90', null),
+(14, 'Alfa Romeo', 'Giulia', 2023, 22000, 380000.00,
+ 'Alfa Romeo Giulia Veloce 2.0 2023 - Sedan esportivo italiano com motor 2.0 turbo de 280cv. Design italiano com grade triângulo, faróis 3+3 LED e rodas 19". Interior luxuoso com bancos em couro e Alcantara, painel digital 12,3" e volante em couro perfurado. Performance: 0-100km/h em 5,7s, distribuição de peso 50/50.',
+ 'vermelho', '2.0 Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-14-giulia.webp"]', true, false, 'ALF4GLI', null),
 
-(15, 'Audi', 'A3', 2023, 29000, 260000.00,
- 'Audi A3 Sportback 40 TFSI S line 2023 - Hatch premium com motor 2.0 TFSI de 204cv e câmbio S tronic de 7 marchas. Design esportivo com grade Singleframe preta, faróis Matrix LED e rodas 18" S line. Interior com bancos esportivos em couro, Virtual Cockpit Plus 12,3", tela MMI 10,1" e acabamento em alumínio. Performance: 0-100km/h em 6,8s, suspensão esportiva e direção progressiva.',
- 'vermelho', '2.0 TFSI', 'AUTOMATICO', 'GASOLINA', '["/images/veiculos/audi/a3.webp","/images/veiculos/audi/a3-lateral.webp","/images/veiculos/audi/a3-interior.webp","/images/veiculos/audi/a3-traseira.webp"]', false,false, 'CDE0F12', null),
+(15, 'Acura', 'RDX', 2023, 18000, 420000.00,
+ 'Acura RDX A-Spec 2023 - SUV premium japonês com motor 2.0 turbo de 272cv. Design agressivo com grade Diamond Pentagon, faróis JewelEye LED e rodas 20" A-Spec. Interior premium com bancos Milano em couro, tela dual 10,2" e sistema de som ELS Studio 16 alto-falantes. Tecnologia AcuraWatch com 10 assistências de direção.',
+ 'branco', '2.0 Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-15-rdx.webp"]', false, false, 'ACU5RDX', null),
 
-(16, 'Nissan', 'Kicks', 2023, 34000, 140000.00,
- 'Nissan Kicks Exclusive 2023 - SUV compacto com motor 1.6 flex de 118cv e transmissão CVT. Design V-Motion 2.0 com faróis full LED, rodas 17" e grade cromada. Destaques: sistema Nissan Intelligent Mobility com alerta de ponto cego, detecção de objetos em movimento e frenagem automática de emergência. Interior com bancos em couro, tela 8" e Nissan Connect Services.',
- 'azul', '1.6 Flex', 'MANUAL', 'FLEX', '["/images/veiculos/nissan/kicks.webp","/images/veiculos/nissan/kicks-lateral.webp","/images/veiculos/nissan/kicks-interior.webp","/images/veiculos/nissan/kicks-traseira.webp"]', false,false, 'FGH1H34', null),
+(16, 'Cadillac', 'XT5', 2023, 25000, 480000.00,
+ 'Cadillac XT5 Premium Luxury 2023 - SUV de luxo americano com motor 2.0 turbo de 237cv. Design imponente com grade vertical, faróis LED e rodas 20". Interior luxuoso com bancos Semi-Aniline em couro, tela 8" com Cadillac User Experience, painel digital e teto panorâmico. Sistema de som Bose Performance Series 8 alto-falantes.',
+ 'preto', '2.0 Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-16-xt5.webp"]', false, false, 'CAD6XT5', null),
 
-(17, 'BMW', '320i', 2022, 48000, 290000.00,
- 'BMW Série 3 320i M Sport 2022 - Sedan esportivo alemão com motor 2.0 TwinPower Turbo de 184cv. Pacote M Sport com aerofólio, rodas 19" M, para-choque esportivo e badges M. Interior com bancos esportivos em couro Dakota, painel Live Cockpit Professional 12,3", tela central 10,25" e volante M multifuncional. Performance: 0-100km/h em 7,1s, suspensão M Sport e freios azuis M.',
- 'branco', '2.0 TwinPower Turbo', 'AUTOMATICO', 'GASOLINA', '["/images/veiculos/bmw/320i.webp","/images/veiculos/bmw/320i-lateral.webp","/images/veiculos/bmw/320i-interior.webp","/images/veiculos/bmw/320i-traseira.webp"]', false,false, 'HIJ2J56', null),
+(17, 'Chery', 'Tiggo 8', 2024, 8000, 185000.00,
+ 'Chery Tiggo 8 Pro Max 2024 - SUV de 7 lugares com motor 1.6 turbo de 197cv. Design robusto com grade Matrix, faróis LED e rodas 19". Interior premium com 3 fileiras, bancos em couro, tela 12,3" dupla (painel + central) e teto panorâmico. Tecnologia: 540° Camera, ADAS com 18 assistências e carregador sem fio.',
+ 'cinza', '1.6 Turbo', 'AUTOMATICO', 'GASOLINA', '["veiculos/0-17-tiggo8.webp"]', true, false, 'CHR7TG8', null),
 
-(18, 'Ford', 'Ranger', 2022, 52000, 240000.00,
- 'Ford Ranger XLT 4x4 Diesel 2022 - Picape média com motor 2.0 Bi-Turbo Diesel de 213cv e torque de 51kgf.m. Transmissão automática de 10 velocidades. Equipada com sistema SYNC 4 com tela 12"", banco do motorista com ajuste elétrico, câmera 360° e assistente de estacionamento. Capacidade de carga: 1.064kg. Destaques: controle de tração eletrônico e modos de condução Terrain Management.',
- 'cinza', '2.0 Bi-Turbo', 'AUTOMATICO', 'DIESEL', '["/images/veiculos/ford/ranger.webp","/images/veiculos/ford/ranger-lateral.webp","/images/veiculos/ford/ranger-interior.webp","/images/veiculos/ford/ranger-cacamba.webp"]', false, false, 'JKL3L78', null),
-
-(19, 'Renault', 'Kwid', 2022, 55000, 65000.00,
- 'Renault Kwid Zen 1.0 2022 - SUV urbano compacto mais acessível do mercado. Motor 1.0 SCe de 70cv, consumo de até 15,7 km/l. Design jovem com grade cromada, faróis com máscara preta e rodas 15". Interior com tela multimídia 8", painel digital 3,5" e volante multifuncional. Destaques: 5 lugares, porta-malas de 290L e 6 airbags. Perfeito para cidade com manobrabilidade excelente.',
- 'vermelho', '1.0 SCe', 'MANUAL', 'FLEX', '["/images/veiculos/renault/kwid.webp","/images/veiculos/renault/kwid-lateral.webp","/images/veiculos/renault/kwid-interior.webp","/images/veiculos/renault/kwid-traseira.webp"]', false,false, 'LMN4M90', null),
-
-(20, 'Volvo', 'XC60', 2022, 45000, 380000.00,
- 'Volvo XC60 B5 Inscription 2022 - SUV premium sueco com motor 2.0 turbo + híbrido leve de 250cv. Design escandinavo com grade vertical, faróis Thor''s Hammer LED e rodas 19". Interior com bancos Nappa ventilados, tela Sensus 9" vertical, painel digital 12,3" e sistema de som Bowers & Wilkins. Segurança máxima: City Safety com detecção de pedestres/ciclistas, pilot assist e proteção whiplash.',
- 'preto', '2.0 Turbo Hybrid', 'AUTOMATICO', 'HIBRIDO', '["/images/veiculos/volvo/xc60.webp","/images/veiculos/volvo/xc60-lateral.webp","/images/veiculos/volvo/xc60-interior.webp","/images/veiculos/volvo/xc60-traseira.webp"]', false,false, 'NOP5P12', null),
-
-(21, 'Land Rover', 'Discovery', 2021, 68000, 420000.00,
- 'Land Rover Discovery Sport D200 R-Dynamic 2021 - SUV premium com motor 2.0 Diesel de 204cv e tração integral permanente. Design robusto com grade R-Dynamic, faróis LED Signature e rodas 20". Interior com bancos Windsor em couro, tela Touch Pro 10", painel digital 12,3" e terceira fileira opcional. Tecnologia off-road: Terrain Response 2, controle de descida e altura do ar variável.',
- 'verde', '2.0 Diesel', 'AUTOMATICO', 'DIESEL', '["/images/veiculos/landrover/discovery.webp","/images/veiculos/landrover/discovery-lateral.webp","/images/veiculos/landrover/discovery-interior.webp","/images/veiculos/landrover/discovery-traseira.webp"]', false,false, 'PQR6R34', null),
-
-(22, 'Mitsubishi', 'L200', 2021, 72000, 230000.00,
- 'Mitsubishi L200 Triton Outdoor 4x4 Diesel 2021 - Picape média com motor 2.4 MIVEC Diesel de 181cv. Transmissão automática de 6 velocidades com modo Super Select 4WD-II. Design aventura com para-choque off-road, steps laterais e rodas 18". Equipada com sistema de som Rockford Fosgate, bancos em couro aquecidos e câmera 360°. Capacidade de carga: 1.015kg.',
- 'prata', '2.4 MIVEC Diesel', 'AUTOMATICO', 'DIESEL', '["/images/veiculos/mitsubishi/l200.webp","/images/veiculos/mitsubishi/l200-lateral.webp","/images/veiculos/mitsubishi/l200-interior.webp","/images/veiculos/mitsubishi/l200-cacamba.webp"]', false,false, 'RST7T56', null),
-
-(23, 'Peugeot', '208', 2021, 65000, 78000.00,
- 'Peugeot 208 Griffe 1.0 2022 - Hatch francês eleito Carro do Ano 2020. Motor 1.0 turbo flex de 125cv, consumo de 16,7 km/l. Design i-Cockpit com volante compacto, painel digital 3D 10"" e tela tátil 10"". Faróis full LED com assinatura "claws", grade cromada e rodas 17"" diamantadas. Destaques: 6 airbags, controle de cruzeiro e alerta de frenagem de emergência.',
- 'amarelo', '1.0 Turbo', 'MANUAL', 'FLEX', '["/images/veiculos/peugeot/208.webp","/images/veiculos/peugeot/208-lateral.webp","/images/veiculos/peugeot/208-interior.webp","/images/veiculos/peugeot/208-traseira.webp"]', false, false, 'TUV8U78', null),
-
-(24, 'Citroën', 'C4 Cactus', 2021, 70000, 115000.00,
+(18, 'Citroën', 'C4 Cactus', 2021, 70000, 115000.00,
  'Citroën C4 Cactus Feel 1.6 2021 - SUV crossover com design exclusivo Airbumps nas laterais. Motor 1.6 flex de 118cv, câmbio automático de 6 marchas. Conforto excepcional com suspensão Progressive Hydraulic Cushions, bancos Advanced Comfort e isolamento acústico. Tecnologia: Head-up Display, tela 10"" e sistema de conectividade com 4G. Diferencial único no mercado.',
- 'branco', '1.6 Flex', 'MANUAL', 'FLEX', '["/images/veiculos/citroen/c4cactus.webp","/images/veiculos/citroen/c4cactuslateral.webp","/images/veiculos/citroen/c4cactus-interior.webp","/images/veiculos/citroen/c4cactus-traseira.webp"]', false, false, 'VWX9X90', null);
+ 'branco', '1.6 Flex', 'MANUAL', 'FLEX', '["veiculos/0-18-c4cactus.webp"]', false, false, 'VWX9X90', null);
 
 
 -- Insert admin user for vehicle management

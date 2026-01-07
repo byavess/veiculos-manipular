@@ -9,11 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.veiculo.model.entity.Veiculo;
 import org.veiculo.service.VeiculoService;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/veiculos")
@@ -50,31 +55,68 @@ public class VeiculoController {
 
     @GetMapping("/imagens")
     public ResponseEntity<Resource> getImagem(@RequestParam("path") String path) {
+        log.info("🔍 [GET /imagens] Requisição recebida para: {}", path);
         try {
             if (path.contains("..")) {
-                log.warn("Imagem path rejected (traversal): {}", path);
+                log.warn("⚠️ [GET /imagens] Path rejeitado (traversal attack): {}", path);
                 return ResponseEntity.badRequest().build();
             }
 
             String normalized = path.replaceFirst("^/+", "").replaceFirst("^images/", "");
+            log.info("📝 [GET /imagens] Path normalizado: {}", normalized);
+
+            // Determina o diretório base do projeto backend
+            String diretorioBase = System.getProperty("user.dir");
+            log.info("🏠 [GET /imagens] Diretório de trabalho: {}", diretorioBase);
+
+            // Se o diretório atual não for o backend, ajusta o caminho
+            if (!diretorioBase.endsWith("veiculos-manipular")) {
+                Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
+                if (Files.exists(caminhoBackend)) {
+                    diretorioBase = caminhoBackend.toString();
+                    log.info("🔄 [GET /imagens] Ajustado para diretório backend: {}", diretorioBase);
+                }
+            }
+
+            // Tenta primeiro no filesystem (para imagens recém-carregadas)
+            Path filesystemPath = Paths.get(diretorioBase, "src", "main", "resources", "images", normalized);
+            log.info("📁 [GET /imagens] Buscando no filesystem: {}", filesystemPath.toAbsolutePath());
+            log.info("   - Existe? {}", Files.exists(filesystemPath));
+            log.info("   - Legível? {}", Files.isReadable(filesystemPath));
+
+            if (Files.exists(filesystemPath) && Files.isReadable(filesystemPath)) {
+                try {
+                    byte[] imageBytes = Files.readAllBytes(filesystemPath);
+                    String contentType = determineContentType(normalized);
+                    log.info("✅ [GET /imagens] Imagem encontrada no filesystem - {} bytes, tipo: {}",
+                             imageBytes.length, contentType);
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType(contentType))
+                            .body(new org.springframework.core.io.ByteArrayResource(imageBytes));
+                } catch (Exception e) {
+                    log.error("❌ [GET /imagens] Erro ao ler do filesystem: {}", filesystemPath, e);
+                }
+            } else {
+                log.info("ℹ️ [GET /imagens] Imagem não encontrada no filesystem, tentando classpath...");
+            }
+
+            // Fallback para classpath (para imagens existentes no JAR)
             String classpathLocation = "images/" + normalized;
-
+            log.info("📦 [GET /imagens] Buscando no classpath: {}", classpathLocation);
             Resource resource = new ClassPathResource(classpathLocation);
-            boolean exists = resource.exists();
-            boolean readable = resource.isReadable();
 
-
-            if (exists && readable) {
+            if (resource.exists() && resource.isReadable()) {
                 String contentType = determineContentType(classpathLocation);
+                log.info("✅ [GET /imagens] Imagem encontrada no classpath - tipo: {}", contentType);
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
             } else {
-                log.warn("Imagem not found: {}", classpathLocation);
+                log.warn("❌ [GET /imagens] Imagem NÃO encontrada em filesystem nem classpath: {}", normalized);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            log.error("Erro ao servir imagem: {}", path, e);
+            log.error("💥 [GET /imagens] Erro inesperado ao servir imagem: {}", path, e);
             return ResponseEntity.internalServerError().build();
         }
     }
