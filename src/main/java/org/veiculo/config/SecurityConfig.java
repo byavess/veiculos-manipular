@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/veiculos/**",
+                                "/api/marcas/**",
+                                "/api/modelos/**",
                                 "/h2-console/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

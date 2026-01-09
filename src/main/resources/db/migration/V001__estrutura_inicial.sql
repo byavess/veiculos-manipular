@@ -1,7 +1,19 @@
+CREATE TABLE marca (
+                       id BIGSERIAL PRIMARY KEY,
+                       nome VARCHAR(100) UNIQUE NOT NULL,
+                       valor VARCHAR(100)
+);
+
+CREATE TABLE modelo (
+                        id BIGSERIAL PRIMARY KEY,
+                        modelo VARCHAR(400) UNIQUE NOT NULL,
+                        marca_id BIGINT NOT NULL,
+                        CONSTRAINT fk_modelo_marca FOREIGN KEY (marca_id) REFERENCES marca(id)
+);
 CREATE TABLE veiculo (
-                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                         marca VARCHAR(100),
-                         modelo VARCHAR(100),
+                         id BIGSERIAL PRIMARY KEY,
+                         marca_id BIGINT,
+                         modelo_id BIGINT,
                          ano INT,
                          km INT DEFAULT 0,
                          preco DECIMAL(10,2),
@@ -14,10 +26,13 @@ CREATE TABLE veiculo (
                          em_oferta BOOLEAN DEFAULT FALSE,
                          vendido BOOLEAN DEFAULT FALSE,
                          placa VARCHAR(20) UNIQUE NOT NULL,
-                         info_venda TEXT
+                         info_venda TEXT,
+                         tipo_veiculo VARCHAR(20),
+                         CONSTRAINT fk_veiculo_marca FOREIGN KEY (marca_id) REFERENCES marca(id),
+                         CONSTRAINT fk_veiculo_modelo FOREIGN KEY (modelo_id) REFERENCES modelo(id)
 );
 CREATE TABLE users (
-                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       id BIGSERIAL PRIMARY KEY,
                        username VARCHAR(50) UNIQUE NOT NULL,
                        password VARCHAR(255) NOT NULL,
                        email VARCHAR(100) UNIQUE NOT NULL,
@@ -27,7 +42,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE IF NOT EXISTS token (
-                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     id BIGSERIAL PRIMARY KEY,
                                      token VARCHAR(512) NOT NULL UNIQUE,
     revoked BOOLEAN NOT NULL DEFAULT FALSE,
     expired BOOLEAN NOT NULL DEFAULT FALSE,

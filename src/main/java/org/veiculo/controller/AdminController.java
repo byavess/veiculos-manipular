@@ -54,7 +54,7 @@ public class AdminController {
 
     @PutMapping("/veiculos/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> updateVeiculo(@PathVariable("id") Long id, @RequestBody VeiculoRequest veiculoRequest) {
+    public ResponseEntity<?> updateVeiculo(@PathVariable("id") Long id, @Valid @RequestBody VeiculoRequest veiculoRequest) {
         try {
             Veiculo updated = veiculoService.atualizar(id, veiculoRequest);
             return ResponseEntity.ok(updated);

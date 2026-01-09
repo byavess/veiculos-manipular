@@ -2,6 +2,7 @@ package org.veiculo.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.veiculo.model.dto.VeiculoRequest;
+import org.veiculo.model.entity.Marca;
+import org.veiculo.model.entity.Modelo;
 import org.veiculo.model.entity.Veiculo;
+import org.veiculo.model.repository.MarcaRepository;
+import org.veiculo.model.repository.ModeloRepository;
 import org.veiculo.model.repository.VeiculoRepository;
 import org.veiculo.security.JwtUtil;
 
@@ -30,6 +35,11 @@ import static org.veiculo.util.PlacaUtil.mascararPlaca;
 @RequiredArgsConstructor
 public class VeiculoService {
     private final VeiculoRepository veiculoRepository;
+    private final MarcaRepository marcaRepository;
+    private final ModeloRepository modeloRepository;
+
+    @Value("${app.images.directory:}")
+    private String imagesDirectory;
 
     private List<Veiculo> getAllVeiculos() {
         List<Veiculo> veiculos = veiculoRepository.findAll();
@@ -53,13 +63,14 @@ public class VeiculoService {
 
     public List<Veiculo> getVeiculosByMarca(String marca) {
         return getAllVeiculos().stream()
-                .filter(veiculo -> veiculo.getMarca().equalsIgnoreCase(marca))
+                .filter(veiculo -> veiculo.getMarca().getNome().equalsIgnoreCase(marca))
                 .toList();
     }
 
     public List<String> getAllMarcas() {
         return getAllVeiculos().stream()
                 .map(Veiculo::getMarca)
+                .map(Marca::getNome)
                 .distinct()
                 .toList();
     }
@@ -67,6 +78,7 @@ public class VeiculoService {
     public List<String> getAllModelos() {
         return getAllVeiculos().stream()
                 .map(Veiculo::getModelo)
+                .map(Modelo::getModelo)
                 .distinct()
                 .sorted()
                 .toList();
@@ -76,13 +88,15 @@ public class VeiculoService {
         if (Objects.isNull(marca) || marca.trim().isEmpty()) {
             return getAllVeiculos().stream()
                     .map(Veiculo::getModelo)
+                    .map(Modelo::getModelo)
                     .distinct()
                     .sorted()
                     .toList();
         }
         return getAllVeiculos().stream()
-                .filter(veiculo -> veiculo.getMarca().equalsIgnoreCase(marca))
+                .filter(veiculo -> veiculo.getMarca().getNome().equalsIgnoreCase(marca))
                 .map(Veiculo::getModelo)
+                .map(Modelo::getModelo)
                 .distinct()
                 .sorted()
                 .toList();
@@ -91,31 +105,31 @@ public class VeiculoService {
 
     public Page<Veiculo> searchVeiculosPaginado(
             String q,
-            String marca,
-            String modelo,
+            Long marcaId,
+            Long modeloId,
             Integer anoMin,
             Integer anoMax,
             String sort,
             String direction,
             int page,
             int size,
-            Boolean vendido // novo parâmetro
+            Boolean vendido
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort));
         Specification<Veiculo> spec = Specification.where(null);
 
         if (q != null && !q.trim().isEmpty()) {
             spec = spec.and((root, query, cb) -> cb.or(
-                    cb.like(cb.lower(root.get("marca")), "%" + q.toLowerCase() + "%"),
-                    cb.like(cb.lower(root.get("modelo")), "%" + q.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("marca").get("nome")), "%" + q.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("modelo").get("modelo")), "%" + q.toLowerCase() + "%"),
                     cb.like(cb.lower(root.get("descricao")), "%" + q.toLowerCase() + "%")
             ));
         }
-        if (marca != null && !marca.trim().isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("marca")), marca.toLowerCase()));
+        if (marcaId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("marca").get("id"), marcaId));
         }
-        if (modelo != null && !modelo.trim().isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("modelo")), modelo.toLowerCase()));
+        if (modeloId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("modelo").get("id"), modeloId));
         }
         if (anoMin != null) {
             spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("ano"), anoMin));
@@ -141,7 +155,7 @@ public class VeiculoService {
         veiculoRepository.findByPlaca(veiculoRequest.getPlaca()).ifPresent(veiculo -> {
             throw new IllegalArgumentException("Veículo com placa " + veiculoRequest.getPlaca() + " já existe.");
         });
-        Veiculo veiculo = veiculoRepository.save(mapperVeiculoRequestParaVeiculo(veiculoRequest));
+        Veiculo veiculo = veiculoRepository.save(mapperVeiculoRequestParaVeiculo(veiculoRequest, marcaRepository, modeloRepository));
 
         // Renomeia as imagens com o ID do veículo após salvar
         if (veiculo.getUrlsFotos() != null && !veiculo.getUrlsFotos().isEmpty()) {
@@ -164,7 +178,7 @@ public class VeiculoService {
             });
         }
 
-        Veiculo veiculoAtualizado = mapperVeiculoRequestParaVeiculo(veiculoRequest);
+        Veiculo veiculoAtualizado = mapperVeiculoRequestParaVeiculo(veiculoRequest, marcaRepository, modeloRepository);
         veiculoAtualizado.setId(id);
 
         Veiculo veiculo = veiculoRepository.save(veiculoAtualizado);
@@ -188,6 +202,9 @@ public class VeiculoService {
 
     public String uploadImagem(MultipartFile file, Principal principal) {
         try {
+            // DEBUG: Mostra o valor exato da propriedade carregada
+            System.out.println("🔍 [DEBUG] Valor de imagesDirectory: [" + imagesDirectory + "]");
+
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 throw new IllegalArgumentException("Arquivo não é uma imagem válida.");
@@ -201,50 +218,64 @@ public class VeiculoService {
             // Gera nome único temporário (sem prefixo de ID ainda, será adicionado no frontend)
             String nomeArquivo = UUID.randomUUID() + extensao;
 
-            // Determina o diretório base do projeto backend
-            // Usa o diretório de trabalho ou tenta encontrar pelo classpath
-            String diretorioBase = System.getProperty("user.dir");
+            Path pastaDestino;
+            Path pastaDestinoBackup = null;
 
-            // Se o diretório atual não for o backend, ajusta o caminho
-            if (!diretorioBase.endsWith("veiculos-manipular")) {
-                // Está rodando do frontend, precisa ir para o backend
-                Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
-                if (Files.exists(caminhoBackend)) {
-                    diretorioBase = caminhoBackend.toString();
+            // Verifica se está em produção (com diretório configurado)
+            if (imagesDirectory != null && !imagesDirectory.isEmpty()) {
+                // PRODUÇÃO: Usa o diretório configurado (ex: /app/images/veiculos)
+                System.out.println("🔍 [DEBUG] Criando Path com: " + imagesDirectory);
+                pastaDestino = Paths.get(imagesDirectory);
+                System.out.println("🚀 [PRODUÇÃO] Usando diretório configurado: " + pastaDestino.toAbsolutePath());
+            } else {
+                // DESENVOLVIMENTO: Usa a estrutura do projeto
+                String diretorioBase = System.getProperty("user.dir");
+
+                // Se o diretório atual não for o backend, ajusta o caminho
+                if (!diretorioBase.endsWith("veiculos-manipular")) {
+                    Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
+                    if (Files.exists(caminhoBackend)) {
+                        diretorioBase = caminhoBackend.toString();
+                    }
                 }
+
+                System.out.println("🔧 [DESENVOLVIMENTO] Diretório base detectado: " + diretorioBase);
+
+                // Usa caminhos absolutos baseados no diretório do projeto BACKEND
+                pastaDestino = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
+                pastaDestinoBackup = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
+
+                System.out.println("📁 Salvando em SRC: " + pastaDestino.toAbsolutePath());
+                System.out.println("📁 Copiando para TARGET: " + pastaDestinoBackup.toAbsolutePath());
             }
 
-            System.out.println("🔧 Diretório base detectado: " + diretorioBase);
-
-            // Usa caminhos absolutos baseados no diretório do projeto BACKEND
-            Path pastaDestinoSrc = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
-            Path pastaDestinoTarget = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
-
-            System.out.println("📁 Salvando em SRC: " + pastaDestinoSrc.toAbsolutePath());
-            System.out.println("📁 Copiando para TARGET: " + pastaDestinoTarget.toAbsolutePath());
-
-            // Garante que os diretórios existam
-            if (!Files.exists(pastaDestinoSrc)) {
-                Files.createDirectories(pastaDestinoSrc);
-                System.out.println("✅ Diretório SRC criado: " + pastaDestinoSrc);
-            }
-            if (!Files.exists(pastaDestinoTarget)) {
-                Files.createDirectories(pastaDestinoTarget);
-                System.out.println("✅ Diretório TARGET criado: " + pastaDestinoTarget);
+            // Garante que o diretório exista
+            if (!Files.exists(pastaDestino)) {
+                Files.createDirectories(pastaDestino);
+                System.out.println("✅ Diretório criado: " + pastaDestino);
             }
 
-            // Salva no diretório src (principal para desenvolvimento)
-            Path destinoSrc = pastaDestinoSrc.resolve(nomeArquivo);
-            file.transferTo(destinoSrc.toFile());
-            System.out.println("✅ Imagem salva em SRC: " + destinoSrc.toAbsolutePath());
+            if (pastaDestinoBackup != null && !Files.exists(pastaDestinoBackup)) {
+                Files.createDirectories(pastaDestinoBackup);
+                System.out.println("✅ Diretório TARGET criado: " + pastaDestinoBackup);
+            }
 
-            // Copia para target (usado em runtime)
-            try {
-                Path destinoTarget = pastaDestinoTarget.resolve(nomeArquivo);
-                Files.copy(destinoSrc, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("✅ Imagem copiada para TARGET: " + destinoTarget.toAbsolutePath());
-            } catch (Exception e) {
-                System.out.println("⚠️ Aviso: Não foi possível copiar para target/classes: " + e.getMessage());
+            // Salva a imagem
+            Path destinoFinal = pastaDestino.resolve(nomeArquivo);
+
+            // Usa Files.copy() ao invés de transferTo() para evitar problemas com caminhos absolutos no Windows
+            Files.copy(file.getInputStream(), destinoFinal, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("✅ Imagem salva: " + destinoFinal.toAbsolutePath());
+
+            // Em desenvolvimento, copia também para target
+            if (pastaDestinoBackup != null) {
+                try {
+                    Path destinoTarget = pastaDestinoBackup.resolve(nomeArquivo);
+                    Files.copy(destinoFinal, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("✅ Imagem copiada para TARGET: " + destinoTarget.toAbsolutePath());
+                } catch (Exception e) {
+                    System.out.println("⚠️ Aviso: Não foi possível copiar para target/classes: " + e.getMessage());
+                }
             }
 
             return "veiculos/" + nomeArquivo;
@@ -267,19 +298,27 @@ public class VeiculoService {
         }
 
         try {
-            // Determina o diretório base do projeto backend
-            String diretorioBase = System.getProperty("user.dir");
+            Path pastaDestino;
+            Path pastaDestinoBackup = null;
 
-            // Se o diretório atual não for o backend, ajusta o caminho
-            if (!diretorioBase.endsWith("veiculos-manipular")) {
-                Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
-                if (Files.exists(caminhoBackend)) {
-                    diretorioBase = caminhoBackend.toString();
+            // Verifica se está em produção (com diretório configurado)
+            if (imagesDirectory != null && !imagesDirectory.isEmpty()) {
+                // PRODUÇÃO: Usa o diretório configurado
+                pastaDestino = Paths.get(imagesDirectory);
+            } else {
+                // DESENVOLVIMENTO: Usa a estrutura do projeto
+                String diretorioBase = System.getProperty("user.dir");
+
+                if (!diretorioBase.endsWith("veiculos-manipular")) {
+                    Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
+                    if (Files.exists(caminhoBackend)) {
+                        diretorioBase = caminhoBackend.toString();
+                    }
                 }
-            }
 
-            Path pastaDestinoSrc = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
-            Path pastaDestinoTarget = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
+                pastaDestino = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
+                pastaDestinoBackup = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
+            }
 
             List<String> novasUrls = new java.util.ArrayList<>();
 
@@ -300,24 +339,26 @@ public class VeiculoService {
                 String prefixo = i == 0 ? "0-" + veiculoId : i + "-" + veiculoId;
                 String novoNome = prefixo + "-" + UUID.randomUUID().toString().substring(0, 8) + extensao;
 
-                // Renomeia no src
-                Path origemSrc = pastaDestinoSrc.resolve(nomeAtual);
-                Path destinoSrc = pastaDestinoSrc.resolve(novoNome);
-                if (Files.exists(origemSrc)) {
-                    Files.move(origemSrc, destinoSrc, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("✅ Renomeado em SRC: " + nomeAtual + " → " + novoNome);
+                // Renomeia no diretório principal
+                Path origem = pastaDestino.resolve(nomeAtual);
+                Path destino = pastaDestino.resolve(novoNome);
+                if (Files.exists(origem)) {
+                    Files.move(origem, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    System.out.println("✅ Renomeado: " + nomeAtual + " → " + novoNome);
                 }
 
-                // Renomeia no target
-                try {
-                    Path origemTarget = pastaDestinoTarget.resolve(nomeAtual);
-                    Path destinoTarget = pastaDestinoTarget.resolve(novoNome);
-                    if (Files.exists(origemTarget)) {
-                        Files.move(origemTarget, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                        System.out.println("✅ Renomeado em TARGET: " + nomeAtual + " → " + novoNome);
+                // Em desenvolvimento, renomeia também no target
+                if (pastaDestinoBackup != null) {
+                    try {
+                        Path origemTarget = pastaDestinoBackup.resolve(nomeAtual);
+                        Path destinoTarget = pastaDestinoBackup.resolve(novoNome);
+                        if (Files.exists(origemTarget)) {
+                            Files.move(origemTarget, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            System.out.println("✅ Renomeado em TARGET: " + nomeAtual + " → " + novoNome);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Aviso ao renomear em target: " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    System.out.println("⚠️ Aviso ao renomear em target: " + e.getMessage());
                 }
 
                 novasUrls.add("veiculos/" + novoNome);

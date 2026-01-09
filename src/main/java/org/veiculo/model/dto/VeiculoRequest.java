@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.veiculo.model.enums.Cambio;
 import org.veiculo.model.enums.Combustivel;
+import org.veiculo.model.validation.ValidInfoVenda;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,12 +15,13 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidInfoVenda
 public class VeiculoRequest {
 
-    @NotBlank
-    private String marca;
-    @NotBlank
-    private String modelo;
+    @NotNull
+    private Long marca;
+    @NotNull
+    private Long modelo;
     @NotNull
     private Integer ano;
     @NotNull
@@ -44,6 +46,6 @@ public class VeiculoRequest {
     private Boolean vendido;
     @NotBlank
     private String placa;
-    @NotBlank
     private String infoVenda;
 }
+

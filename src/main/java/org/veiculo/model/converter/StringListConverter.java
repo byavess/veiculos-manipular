@@ -24,7 +24,6 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
         try {
             return objectMapper.writeValueAsString(attribute);
         } catch (JsonProcessingException e) {
-            log.error("Erro ao converter List<String> para JSON", e);
             return "[]";
         }
     }
@@ -38,7 +37,6 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
             return objectMapper.readValue(dbData, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            log.error("Erro ao converter JSON para List<String>: {}", dbData, e);
             return new ArrayList<>();
         }
     }

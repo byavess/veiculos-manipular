@@ -1,5 +1,6 @@
 package org.veiculo.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.veiculo.model.converter.StringListConverter;
 import org.veiculo.model.enums.Cambio;
 import org.veiculo.model.enums.Combustivel;
+import org.veiculo.model.enums.TipoVeiculo;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,12 +19,24 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Veiculo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String marca;
-    private String modelo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marca_id")
+    @JsonIgnoreProperties({"modelos", "hibernateLazyInitializer", "handler"})
+    private Marca marca;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "modelo_id")
+    @JsonIgnoreProperties({"marca", "hibernateLazyInitializer", "handler"})
+    private Modelo modelo;
+
+    // ...existing code...
+
     private Integer ano;
     private Integer km;
 
@@ -56,4 +70,8 @@ public class Veiculo {
 
     @Column(name = "info_venda", columnDefinition = "TEXT")
     private String infoVenda;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TipoVeiculo tipoVeiculo;
 }
