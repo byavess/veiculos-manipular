@@ -155,6 +155,12 @@ public class VeiculoService {
         veiculoRepository.findByPlaca(veiculoRequest.getPlaca()).ifPresent(veiculo -> {
             throw new IllegalArgumentException("Veículo com placa " + veiculoRequest.getPlaca() + " já existe.");
         });
+
+        // Valida limite máximo de 7 imagens
+        if (veiculoRequest.getUrlsFotos() != null && veiculoRequest.getUrlsFotos().size() > 7) {
+            throw new IllegalArgumentException("Limite máximo de 7 imagens por veículo.");
+        }
+
         Veiculo veiculo = veiculoRepository.save(mapperVeiculoRequestParaVeiculo(veiculoRequest, marcaRepository, modeloRepository));
 
         // Renomeia as imagens com o ID do veículo após salvar
@@ -176,6 +182,11 @@ public class VeiculoService {
             veiculoRepository.findByPlaca(veiculoRequest.getPlaca()).ifPresent(veiculo -> {
                 throw new IllegalArgumentException("Veículo com placa " + veiculoRequest.getPlaca() + " já existe.");
             });
+        }
+
+        // Valida limite máximo de 7 imagens
+        if (veiculoRequest.getUrlsFotos() != null && veiculoRequest.getUrlsFotos().size() > 7) {
+            throw new IllegalArgumentException("Limite máximo de 7 imagens por veículo.");
         }
 
         Veiculo veiculoAtualizado = mapperVeiculoRequestParaVeiculo(veiculoRequest, marcaRepository, modeloRepository);
@@ -202,8 +213,12 @@ public class VeiculoService {
 
     public String uploadImagem(MultipartFile file, Principal principal) {
         try {
-            // DEBUG: Mostra o valor exato da propriedade carregada
-            System.out.println("🔍 [DEBUG] Valor de imagesDirectory: [" + imagesDirectory + "]");
+
+            // Valida tamanho do arquivo (máximo 2MB)
+            long maxTamanhoBytes = 2 * 1024 * 1024; // 2MB
+            if (file.getSize() > maxTamanhoBytes) {
+                throw new IllegalArgumentException("A imagem excede o tamanho máximo de 2MB.");
+            }
 
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
@@ -223,10 +238,7 @@ public class VeiculoService {
 
             // Verifica se está em produção (com diretório configurado)
             if (imagesDirectory != null && !imagesDirectory.isEmpty()) {
-                // PRODUÇÃO: Usa o diretório configurado (ex: /app/images/veiculos)
-                System.out.println("🔍 [DEBUG] Criando Path com: " + imagesDirectory);
                 pastaDestino = Paths.get(imagesDirectory);
-                System.out.println("🚀 [PRODUÇÃO] Usando diretório configurado: " + pastaDestino.toAbsolutePath());
             } else {
                 // DESENVOLVIMENTO: Usa a estrutura do projeto
                 String diretorioBase = System.getProperty("user.dir");
@@ -239,25 +251,20 @@ public class VeiculoService {
                     }
                 }
 
-                System.out.println("🔧 [DESENVOLVIMENTO] Diretório base detectado: " + diretorioBase);
+
 
                 // Usa caminhos absolutos baseados no diretório do projeto BACKEND
                 pastaDestino = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
                 pastaDestinoBackup = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
-
-                System.out.println("📁 Salvando em SRC: " + pastaDestino.toAbsolutePath());
-                System.out.println("📁 Copiando para TARGET: " + pastaDestinoBackup.toAbsolutePath());
             }
 
             // Garante que o diretório exista
             if (!Files.exists(pastaDestino)) {
                 Files.createDirectories(pastaDestino);
-                System.out.println("✅ Diretório criado: " + pastaDestino);
             }
 
             if (pastaDestinoBackup != null && !Files.exists(pastaDestinoBackup)) {
                 Files.createDirectories(pastaDestinoBackup);
-                System.out.println("✅ Diretório TARGET criado: " + pastaDestinoBackup);
             }
 
             // Salva a imagem
@@ -265,14 +272,12 @@ public class VeiculoService {
 
             // Usa Files.copy() ao invés de transferTo() para evitar problemas com caminhos absolutos no Windows
             Files.copy(file.getInputStream(), destinoFinal, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("✅ Imagem salva: " + destinoFinal.toAbsolutePath());
 
             // Em desenvolvimento, copia também para target
             if (pastaDestinoBackup != null) {
                 try {
                     Path destinoTarget = pastaDestinoBackup.resolve(nomeArquivo);
                     Files.copy(destinoFinal, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("✅ Imagem copiada para TARGET: " + destinoTarget.toAbsolutePath());
                 } catch (Exception e) {
                     System.out.println("⚠️ Aviso: Não foi possível copiar para target/classes: " + e.getMessage());
                 }
@@ -344,7 +349,6 @@ public class VeiculoService {
                 Path destino = pastaDestino.resolve(novoNome);
                 if (Files.exists(origem)) {
                     Files.move(origem, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("✅ Renomeado: " + nomeAtual + " → " + novoNome);
                 }
 
                 // Em desenvolvimento, renomeia também no target
@@ -354,7 +358,6 @@ public class VeiculoService {
                         Path destinoTarget = pastaDestinoBackup.resolve(novoNome);
                         if (Files.exists(origemTarget)) {
                             Files.move(origemTarget, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                            System.out.println("✅ Renomeado em TARGET: " + nomeAtual + " → " + novoNome);
                         }
                     } catch (Exception e) {
                         System.out.println("⚠️ Aviso ao renomear em target: " + e.getMessage());
@@ -369,7 +372,6 @@ public class VeiculoService {
             if (veiculo != null) {
                 veiculo.setUrlsFotos(novasUrls);
                 veiculoRepository.save(veiculo);
-                System.out.println("✅ URLs atualizadas no banco para veículo ID " + veiculoId);
             }
 
         } catch (Exception e) {

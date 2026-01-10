@@ -1,7 +1,6 @@
 package org.veiculo.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.veiculo.model.enums.Cambio;
@@ -38,7 +37,6 @@ public class VeiculoRequest {
     private Cambio cambio;
     @NotNull
     private Combustivel combustivel;
-    @NotEmpty
     private List<String> urlsFotos;
     @NotNull
     private Boolean emOferta = false;

@@ -1,0 +1,13 @@
+# Arquivo .dockerignore para otimizar o build
+target/
+!target/veiculo-backend-1.0-SNAPSHOT.jar
+.mvn/
+.git/
+.gitignore
+.idea/
+*.iml
+*.log
+docker-compose.yml
+README.md
+.env
+

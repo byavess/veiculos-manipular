@@ -22,11 +22,9 @@ public class ModeloController {
             @RequestParam(name = "marcaId", required = false) Long marcaId) {
 
         if (marcaId != null) {
-            log.info("Listando modelos da marca ID: {}", marcaId);
             return ResponseEntity.ok(modeloService.listarPorMarcaId(marcaId));
         }
 
-        log.info("Listando todos os modelos");
         return ResponseEntity.ok(modeloService.listarTodos());
     }
 
