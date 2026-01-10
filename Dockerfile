@@ -16,8 +16,6 @@ COPY --from=build /app/target/veiculo-backend-1.0-SNAPSHOT.jar app.jar
 # Cria o diretório para armazenar as imagens
 RUN mkdir -p /app/images/veiculos && chmod -R 755 /app/images
 
-# Define o volume para persistência das imagens
-VOLUME /app/images
 
 EXPOSE 8080
 

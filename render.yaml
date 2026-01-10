@@ -39,7 +39,7 @@ services:
     disk:
       name: veiculo-images
       mountPath: /app/images
-      sizeGB: 1
+      sizeGB: 10
     healthCheckPath: /actuator/health
     autoDeploy: true
 
