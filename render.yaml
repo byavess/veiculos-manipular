@@ -35,6 +35,6 @@ services:
     disk:
       name: veiculo-images
       mountPath: /app/images
-      sizeGB: 10  # pode aumentar conforme necessidade
+      sizeGB: 10
     healthCheckPath: /actuator/health
     autoDeploy: true
