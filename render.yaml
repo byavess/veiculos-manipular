@@ -1,19 +1,15 @@
-# Render Blueprint para deploy automático
-# Documentação: https://render.com/docs/blueprint-spec
-
 databases:
   - name: veiculos-postgres
     databaseName: veiculosdb
     user: veiculosdb_user
-    plan: free
+    plan: standard  # ou pro para melhor performance
     region: oregon
 
 services:
-  # Backend (Spring Boot)
   - type: web
     name: veiculos-backend
     env: docker
-    plan: free
+    plan: standard  # Professional = standard/pro no Render
     region: oregon
     dockerfilePath: ./Dockerfile
     dockerContext: .
@@ -39,7 +35,6 @@ services:
     disk:
       name: veiculo-images
       mountPath: /app/images
-      sizeGB: 10
+      sizeGB: 10  # pode aumentar conforme necessidade
     healthCheckPath: /actuator/health
     autoDeploy: true
-
