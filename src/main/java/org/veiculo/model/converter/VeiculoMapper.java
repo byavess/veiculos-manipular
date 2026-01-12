@@ -38,6 +38,7 @@ public class VeiculoMapper {
                 .vendido(veiculoRequest.getVendido())
                 .placa(veiculoRequest.getPlaca())
                 .infoVenda(veiculoRequest.getInfoVenda())
+                .tipoVeiculo(veiculoRequest.getTipoVeiculo())
                 .build();
     }
 }

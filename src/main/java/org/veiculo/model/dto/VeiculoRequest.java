@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.veiculo.model.enums.Cambio;
 import org.veiculo.model.enums.Combustivel;
+import org.veiculo.model.enums.TipoVeiculo;
 import org.veiculo.model.validation.ValidInfoVenda;
 
 import java.math.BigDecimal;
@@ -45,5 +46,6 @@ public class VeiculoRequest {
     @NotBlank
     private String placa;
     private String infoVenda;
+    private TipoVeiculo tipoVeiculo = TipoVeiculo.CARRO;
 }
 
