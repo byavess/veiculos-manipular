@@ -2,6 +2,7 @@ package org.veiculo.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +23,7 @@ import org.veiculo.security.JwtUtil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,6 +34,7 @@ import static org.veiculo.util.PlacaUtil.mascararPlaca;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class VeiculoService {
     private final VeiculoRepository veiculoRepository;
     private final MarcaRepository marcaRepository;
@@ -189,6 +191,33 @@ public class VeiculoService {
             throw new IllegalArgumentException("Limite máximo de 7 imagens por veículo.");
         }
 
+        // Identifica e deleta imagens removidas
+        if (veiculoExistente.getUrlsFotos() != null && !veiculoExistente.getUrlsFotos().isEmpty()) {
+            List<String> urlsAntigas = veiculoExistente.getUrlsFotos();
+            List<String> urlsNovas = veiculoRequest.getUrlsFotos() != null ? veiculoRequest.getUrlsFotos() : List.of();
+
+            // Encontra URLs que foram removidas
+            List<String> urlsRemovidas = urlsAntigas.stream()
+                    .filter(urlAntiga -> !urlsNovas.contains(urlAntiga))
+                    .toList();
+
+            // Deleta as imagens removidas do diretório
+            if (!urlsRemovidas.isEmpty() && imagesDirectory != null && !imagesDirectory.isEmpty()) {
+                Path pastaDestino = Paths.get(imagesDirectory);
+                if (Files.exists(pastaDestino)) {
+                    for (String urlRemovida : urlsRemovidas) {
+                        String nomeArquivo = urlRemovida.replace("veiculos/", "");
+                        Path caminhoImagem = pastaDestino.resolve(nomeArquivo);
+                        try {
+                            Files.deleteIfExists(caminhoImagem);
+                        } catch (Exception e) {
+                            log.error("⚠\uFE0F Não foi possível deletar a imagem: {} - {}", caminhoImagem, e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
         Veiculo veiculoAtualizado = mapperVeiculoRequestParaVeiculo(veiculoRequest, marcaRepository, modeloRepository);
         veiculoAtualizado.setId(id);
 
@@ -208,11 +237,47 @@ public class VeiculoService {
         Veiculo veiculoExistente = veiculoRepository.findById(id).orElseThrow(
                 () -> new IllegalArgumentException("Veículo com ID " + id + " não encontrado.")
         );
+
+        if (imagesDirectory == null || imagesDirectory.isEmpty()) {
+            throw new IllegalStateException("Diretório de imagens não configurado. Defina a propriedade 'app.images.directory'.");
+        }
+
+        Path pastaDestino = Paths.get(imagesDirectory);
+
+        if (!Files.exists(pastaDestino)) {
+            throw new IllegalStateException("Diretório de imagens não existe: " + imagesDirectory);
+        }
+
+        // Deleta as imagens associadas ao veículo
+        if (veiculoExistente.getUrlsFotos() != null) {
+            for (String url : veiculoExistente.getUrlsFotos()) {
+                String nomeArquivo = url.replace("veiculos/", "");
+                Path caminhoImagem = pastaDestino.resolve(nomeArquivo);
+                try {
+                    Files.deleteIfExists(caminhoImagem);
+                } catch (Exception e) {
+                    log.error("⚠\uFE0F Não foi possível deletar a imagem: {} - {}", caminhoImagem, e.getMessage());
+                }
+            }
+        }
+
         veiculoRepository.delete(veiculoExistente);
     }
 
-    public String uploadImagem(MultipartFile file, Principal principal) {
+
+    public String uploadImagem(MultipartFile file) {
         try {
+            // Valida se o diretório está configurado
+            if (imagesDirectory == null || imagesDirectory.isEmpty()) {
+                throw new IllegalStateException("Diretório de imagens não configurado. Defina a propriedade 'app.images.directory'.");
+            }
+
+            Path pastaDestino = Paths.get(imagesDirectory);
+
+            // Verifica se o diretório existe
+            if (!Files.exists(pastaDestino)) {
+                throw new IllegalStateException("Diretório de imagens não existe: " + imagesDirectory);
+            }
 
             // Valida tamanho do arquivo (máximo 2MB)
             long maxTamanhoBytes = 2 * 1024 * 1024; // 2MB
@@ -230,68 +295,21 @@ public class VeiculoService {
                     .map(f -> f.substring(f.lastIndexOf('.')))
                     .orElse(".jpg");
 
-            // Gera nome único temporário (sem prefixo de ID ainda, será adicionado no frontend)
             String nomeArquivo = UUID.randomUUID() + extensao;
-
-            Path pastaDestino;
-            Path pastaDestinoBackup = null;
-
-            // Verifica se está em produção (com diretório configurado)
-            if (imagesDirectory != null && !imagesDirectory.isEmpty()) {
-                pastaDestino = Paths.get(imagesDirectory);
-            } else {
-                // DESENVOLVIMENTO: Usa a estrutura do projeto
-                String diretorioBase = System.getProperty("user.dir");
-
-                // Se o diretório atual não for o backend, ajusta o caminho
-                if (!diretorioBase.endsWith("veiculos-manipular")) {
-                    Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
-                    if (Files.exists(caminhoBackend)) {
-                        diretorioBase = caminhoBackend.toString();
-                    }
-                }
-
-
-
-                // Usa caminhos absolutos baseados no diretório do projeto BACKEND
-                pastaDestino = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
-                pastaDestinoBackup = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
-            }
-
-            // Garante que o diretório exista
-            if (!Files.exists(pastaDestino)) {
-                Files.createDirectories(pastaDestino);
-            }
-
-            if (pastaDestinoBackup != null && !Files.exists(pastaDestinoBackup)) {
-                Files.createDirectories(pastaDestinoBackup);
-            }
-
-            // Salva a imagem
             Path destinoFinal = pastaDestino.resolve(nomeArquivo);
-
-            // Usa Files.copy() ao invés de transferTo() para evitar problemas com caminhos absolutos no Windows
-            Files.copy(file.getInputStream(), destinoFinal, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-            // Em desenvolvimento, copia também para target
-            if (pastaDestinoBackup != null) {
-                try {
-                    Path destinoTarget = pastaDestinoBackup.resolve(nomeArquivo);
-                    Files.copy(destinoFinal, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                } catch (Exception e) {
-                    System.out.println("⚠️ Aviso: Não foi possível copiar para target/classes: " + e.getMessage());
-                }
-            }
+            Files.copy(file.getInputStream(), destinoFinal, StandardCopyOption.REPLACE_EXISTING);
 
             return "veiculos/" + nomeArquivo;
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IllegalStateException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("❌ Erro ao salvar imagem: " + e.getMessage());
+            log.error("❌ Erro ao salvar imagem: {}", e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Erro ao salvar imagem: " + e.getMessage(), e);
         }
     }
+
+
 
     /**
      * Renomeia imagens do veículo com prefixo do ID
@@ -302,72 +320,41 @@ public class VeiculoService {
             return;
         }
 
+        if (imagesDirectory == null || imagesDirectory.isEmpty()) {
+            throw new IllegalStateException("Diretório de imagens não configurado. Defina a propriedade 'app.images.directory'.");
+        }
+
+        Path pastaDestino = Paths.get(imagesDirectory);
+
+        if (!Files.exists(pastaDestino)) {
+            throw new IllegalStateException("Diretório de imagens não existe: " + imagesDirectory);
+        }
+
         try {
-            Path pastaDestino;
-            Path pastaDestinoBackup = null;
-
-            // Verifica se está em produção (com diretório configurado)
-            if (imagesDirectory != null && !imagesDirectory.isEmpty()) {
-                // PRODUÇÃO: Usa o diretório configurado
-                pastaDestino = Paths.get(imagesDirectory);
-            } else {
-                // DESENVOLVIMENTO: Usa a estrutura do projeto
-                String diretorioBase = System.getProperty("user.dir");
-
-                if (!diretorioBase.endsWith("veiculos-manipular")) {
-                    Path caminhoBackend = Paths.get(diretorioBase).getParent().resolve("veiculos-manipular");
-                    if (Files.exists(caminhoBackend)) {
-                        diretorioBase = caminhoBackend.toString();
-                    }
-                }
-
-                pastaDestino = Paths.get(diretorioBase, "src", "main", "resources", "images", "veiculos");
-                pastaDestinoBackup = Paths.get(diretorioBase, "target", "classes", "images", "veiculos");
-            }
-
             List<String> novasUrls = new java.util.ArrayList<>();
 
             for (int i = 0; i < urlsFotos.size(); i++) {
                 String urlAtual = urlsFotos.get(i);
                 String nomeAtual = urlAtual.replace("veiculos/", "");
 
-                // Pula se já tem prefixo de ID
                 if (nomeAtual.matches("\\d+-" + veiculoId + "-.*")) {
                     novasUrls.add(urlAtual);
                     continue;
                 }
 
-                // Extrai extensão
                 String extensao = nomeAtual.contains(".") ? nomeAtual.substring(nomeAtual.lastIndexOf('.')) : ".jpg";
-
-                // Primeira imagem: prefixo "0-{id}", demais "{ordem}-{id}"
                 String prefixo = i == 0 ? "0-" + veiculoId : i + "-" + veiculoId;
                 String novoNome = prefixo + "-" + UUID.randomUUID().toString().substring(0, 8) + extensao;
 
-                // Renomeia no diretório principal
                 Path origem = pastaDestino.resolve(nomeAtual);
                 Path destino = pastaDestino.resolve(novoNome);
                 if (Files.exists(origem)) {
-                    Files.move(origem, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                }
-
-                // Em desenvolvimento, renomeia também no target
-                if (pastaDestinoBackup != null) {
-                    try {
-                        Path origemTarget = pastaDestinoBackup.resolve(nomeAtual);
-                        Path destinoTarget = pastaDestinoBackup.resolve(novoNome);
-                        if (Files.exists(origemTarget)) {
-                            Files.move(origemTarget, destinoTarget, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("⚠️ Aviso ao renomear em target: " + e.getMessage());
-                    }
+                    Files.move(origem, destino, StandardCopyOption.REPLACE_EXISTING);
                 }
 
                 novasUrls.add("veiculos/" + novoNome);
             }
 
-            // Atualiza as URLs no banco
             Veiculo veiculo = veiculoRepository.findById(veiculoId).orElse(null);
             if (veiculo != null) {
                 veiculo.setUrlsFotos(novasUrls);
@@ -377,6 +364,8 @@ public class VeiculoService {
         } catch (Exception e) {
             System.err.println("❌ Erro ao renomear imagens do veículo " + veiculoId + ": " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("Erro ao renomear imagens: " + e.getMessage(), e);
         }
     }
+
 }

@@ -81,10 +81,10 @@ public class AdminController {
 
     @PostMapping("/veiculos/upload-imagem")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> uploadImagem(@RequestParam("file") MultipartFile file, Principal principal) {
+    public ResponseEntity<?> uploadImagem(@RequestParam("file") MultipartFile file) {
         try {
             // Chama o service para tratar o upload e regras de negócio
-            String caminhoRelativo = veiculoService.uploadImagem(file, principal);
+            String caminhoRelativo = veiculoService.uploadImagem(file);
 
             // Retorna como JSON para o Angular parsear corretamente
             Map<String, String> response = new HashMap<>();
@@ -97,7 +97,7 @@ public class AdminController {
         } catch (Exception e) {
             e.printStackTrace();
             Map<String, String> error = new HashMap<>();
-            error.put("error", "Erro ao fazer upload da imagem.");
+            error.put("error", "Erro ao fazer upload da imagem. Tente novamente mais tarde.");
             return ResponseEntity.status(500).body(error);
         }
     }

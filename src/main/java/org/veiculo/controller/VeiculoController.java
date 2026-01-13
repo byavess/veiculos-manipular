@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.veiculo.model.dto.PageResponse;
 import org.veiculo.model.entity.Veiculo;
 import org.veiculo.service.VeiculoService;
 
@@ -124,7 +125,7 @@ public class VeiculoController {
     }
 
     @GetMapping()
-    public Page<Veiculo> getVeiculosPaginado(
+    public PageResponse<Veiculo> getVeiculosPaginado(
             @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "marcaId", required = false) Long marcaId,
             @RequestParam(name = "modeloId", required = false) Long modeloId,
@@ -136,8 +137,21 @@ public class VeiculoController {
             @RequestParam(name = "size", defaultValue = "12") int size,
             @RequestParam(name = "vendido", required = false) Boolean vendido
     ) {
-        return veiculoService.searchVeiculosPaginado(
+        Page<Veiculo> pageResult = veiculoService.searchVeiculosPaginado(
                 q, marcaId, modeloId, anoMin, anoMax, sort, direction, page, size, vendido
+        );
+
+        return new PageResponse<>(
+                pageResult.getContent(),
+                pageResult.getNumber(),
+                pageResult.getSize(),
+                pageResult.getTotalElements(),
+                pageResult.getTotalPages(),
+                pageResult.isFirst(),
+                pageResult.isLast(),
+                sort,
+                direction
         );
     }
 }
+
